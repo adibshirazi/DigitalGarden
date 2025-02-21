@@ -42,26 +42,18 @@ jobs:
           node-version: "20"
           cache: ${{ env.manager }}
 
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
-        with:
-          static_site_generator: next
-
-      - name: Restore Cache
-        uses: actions/cache@v4
-        with:
-          path: .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install Dependencies
         run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Build with Next.js
         run: ${{ env.runner }} next build
 
-      - name: Export Static Site
-        run: ${{ env.runner }} next export
+      - name: Configure for GitHub Pages
+        run: |
+          echo "Building static site for GitHub Pages"
+          npm run export
+          mkdir -p out
+          cp -r out/* ./out
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
